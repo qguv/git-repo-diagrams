@@ -67,19 +67,40 @@ git commit --allow-empty -m 'work 10'
 
 diagram
 
+# prod becomes stable
 git branch -f stable prod
+
+# hack: makes diagram easier to read
+git branch -D prod
 
 diagram
 
+# uat becomes prod
 git switch -C prod uat
+
+# hack: makes diagram easier to read
+git branch -D uat
+
+diagram
+
+# create release commit on prod
 git commit --allow-empty -m 'prepare release v4.2.0'
 git tag -am v4.2.0 v4.2.0
 
 diagram
 
+# update translations on develop
 git switch develop
 git commit --allow-empty -m 'update translations 4'
+
+diagram
+
+# then uat becomes develop
 git branch -f uat develop
+
+diagram
+
+# now, develop can move on
 git commit --allow-empty -m 'work 11'
 git commit --allow-empty -m 'work 12'
 

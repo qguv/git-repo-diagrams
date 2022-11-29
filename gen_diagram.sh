@@ -10,7 +10,7 @@ if swaymsg -t get_tree | jq -e -f "$SCRIPT_DIR/gitg.jq" > /dev/null; then
 fi
 
 current_branch="$(git branch --show-current)"
-git switch -C delete-me
+git switch -C delete-me develop
 git commit -m 'delete me' --allow-empty
 
 empty_conf="$(mktemp -d)"
