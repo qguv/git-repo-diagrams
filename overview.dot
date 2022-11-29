@@ -1,0 +1,29 @@
+digraph {
+    nodesep=0.5
+    edge [arrowhead=vee fontsize=10]
+    node [shape=box]
+
+    {
+        rank=same
+
+        PR [label="normal PR"]
+
+        {
+            node [shape=diamond fixedsize=shape height=1 width=1 fontname="Inconsolata"]
+            develop
+            uat
+            prod
+            stable
+        }
+    }
+
+    // code flow
+    PR -> develop -> uat -> prod -> stable [color="#00aa00"]
+
+    // hotfix flow
+    {
+        edge [color="#aa0000"]
+        hotfix -> develop
+        develop -> {uat prod} [style=dashed]
+    }
+}
