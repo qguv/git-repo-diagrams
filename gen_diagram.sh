@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-printf '[DEBUG] SCRIPT_DIR: %s\n' "$SCRIPT_DIR" # DEBUG
 output_path="${1?output path required}"
 sleep_time="${2:-0.3}"
 
@@ -14,8 +13,8 @@ current_branch="$(git branch --show-current)"
 git switch -C delete-me
 git commit -m 'delete me' --allow-empty
 
-tmpdir="$(mktemp -d)"
-XDG_CONFIG_HOME="$tmpdir" gitg --all &
+empty_conf="$(mktemp -d)"
+XDG_CONFIG_HOME="$empty_conf" gitg --all &
 sleep "$sleep_time"
 
 swaymsg '[app_id="gitg"]' floating enable
@@ -33,6 +32,10 @@ grim -g "$x,$y ${w}x${h}" -t png "$output_path"
 mogrify -trim -bordercolor white -border 10 "$output_path"
 
 swaymsg '[app_id="gitg"]' kill
-rm -r "$tmpdir"
+while pgrep gitg; do
+    sleep "$sleep_time"
+done
+
+rm -r "$empty_conf"
 git switch "$current_branch"
 git branch -D delete-me
