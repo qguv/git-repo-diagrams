@@ -2,7 +2,7 @@ rule sh
     command = sh $in
 
 rule dot
-    command = dot -T$type -o$out $in
+    command = dot -Gdpi=200 -T$type -o$out $in
 
 build | 001.png 002.png 003.png 004.png 005.png 006.png 007.png 008.png 009.png 010.png: sh create_history.sh | gen_diagram.sh gitg.jq
 
