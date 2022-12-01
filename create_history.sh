@@ -74,16 +74,10 @@ diagram
 # prod becomes stable
 git branch -f stable prod
 
-# hack: makes diagram easier to read
-git branch -D prod
-
 diagram
 
 # uat becomes prod
 git switch -C prod uat
-
-# hack: makes diagram easier to read
-git branch -D uat
 
 diagram
 
