@@ -9,19 +9,24 @@ diagram() {
         i=$((i + 1))
         filename="$(printf '%03d.png' $i)"
     fi
+
     sh "$SCRIPT_DIR/gen_diagram.sh" "$SCRIPT_DIR/$filename" develop
     printf 'wrote %s\n' "$filename"
 }
+
+# set dates artificially to fix commit ordering in diagrams
+t=0
+isodate() {
+    t=$((t + 1))
+    GIT_COMMITTER_DATE="$(($t + 100000000)) +0100" "$@"
+}
+alias git='isodate git'
 
 repo="$(mktemp -d)"
 pushd "$repo"
 
 git init
 git branch -m develop
-
-# introduce a one-second delay after commits, to fix commit ordering in diagrams
-echo sleep 1 >> .git/hooks/post-commit
-chmod u+x .git/hooks/post-commit
 
 git commit --allow-empty -m 'initial commit'
 git commit --allow-empty -m 'update translations 1'
