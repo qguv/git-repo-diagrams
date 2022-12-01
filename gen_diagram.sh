@@ -1,41 +1,60 @@
 #!/bin/sh
 set -e
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 output_path="${1?output path required}"
 sleep_time="${2:-0.3}"
 
-if swaymsg -t get_tree | jq -e -f "$SCRIPT_DIR/gitg.jq" > /dev/null; then
-    printf "gitg is already running, please quit it first\n" >&2
-    exit 1
-fi
+resolution_multiplier=3
+gitg_default_w=660
+gitg_default_h=556
+crop_topleft_x=206
+crop_topleft_y=76
+crop_bottomright_x=610
+crop_bottomright_y=501
 
 current_branch="$(git branch --show-current)"
 git switch -C delete-me develop
 git commit -m 'delete me' --allow-empty
 
+# create virtual display
+gitg_w=$(($gitg_default_w * $resolution_multiplier))
+gitg_h=$(($gitg_default_w * $resolution_multiplier))
+Xvfb :1 -screen 0 ${gitg_w}x${gitg_h}x24 &
+xvfb_pid="$!"
+
+# create empty dconf configuration
 empty_conf="$(mktemp -d)"
-XDG_CONFIG_HOME="$empty_conf" gitg --all &
+mkdir "$empty_conf/dconf"
+
+# start gitg in virtual display
+env -i \
+    HOME="$empty_conf" \
+    USER="$USER" \
+    DISPLAY=":1" \
+    GDK_SCALE=$resolution_multiplier \
+    gitg --all &
+gitg_pid="$!"
+
 sleep "$sleep_time"
 
-swaymsg '[app_id="gitg"]' floating enable
-sleep "$sleep_time"
+# take screenshot
+import -display :1 -window root "$output_path"
 
-swaymsg '[app_id="gitg"]' resize set width 300 px height 1000 px
-sleep "$sleep_time"
-
-win_pos="$(swaymsg -t get_tree | jq --raw-output -f "$SCRIPT_DIR/gitg.jq")"
-x=$(( ${win_pos%%,*} + 201 ))
-y=$(( ${win_pos##*,} + 72 ))
-w=323
-h=422
-grim -g "$x,$y ${w}x${h}" -t png "$output_path"
-mogrify -trim -bordercolor white -border 10 "$output_path"
-
-swaymsg '[app_id="gitg"]' kill
-while pgrep gitg; do
-    sleep "$sleep_time"
-done
-
+# kill processes
+kill "$gitg_pid"
+kill "$xvfb_pid"
 rm -r "$empty_conf"
+
+# crop, trim, and add border
+w=$(($resolution_multiplier * ($crop_bottomright_x - $crop_topleft_x)))
+h=$(($resolution_multiplier * ($crop_bottomright_y - $crop_topleft_y)))
+x=$(($resolution_multiplier * $crop_topleft_x))
+y=$(($resolution_multiplier * $crop_topleft_y))
+geometry="${w}x${h}+${x}+${y}"
+mogrify \
+    -crop $geometry \
+    -trim \
+    -bordercolor white -border 10 \
+    "$output_path"
+
 git switch "$current_branch"
 git branch -D delete-me
