@@ -10,7 +10,7 @@ crop_topleft_x=206
 crop_topleft_y=76
 crop_bottomright_x=610
 crop_bottomright_y=501
-sleep_time=0.3
+sleep_time=0.4
 
 current_branch="$(git branch --show-current)"
 if [ -n "$show_branch" ]; then
