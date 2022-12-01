@@ -3,15 +3,34 @@ set -e
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 i=0
+diagram_filename() {
+    printf '%s/%03d.png' "$SCRIPT_DIR" "$i"
+}
 diagram() {
-    filename="$1"
-    if [ -z "$filename" ]; then
-        i=$((i + 1))
-        filename="$(printf '%03d.png' $i)"
-    fi
-
-    sh "$SCRIPT_DIR/gen_diagram.sh" "$SCRIPT_DIR/$filename" develop
+    i=$((i + 1))
+    filename="$(diagram_filename)"
+    sh "$SCRIPT_DIR/gen_diagram.sh" "$filename" develop
     printf 'wrote %s\n' "$filename"
+}
+add_arrow() {
+    x1="$1"
+    y1="$2"
+    x2="$3"
+    y2="$4"
+    angle="$(python3 -c "import math; print(math.degrees(math.atan(($y2 - $y1) / ($x2 - $x1))))")"
+    arrow_head="path 'M 0,0  l -15,-5  +5,+5  -5,+5  +15,-5 z'"
+    mogrify \
+        -stroke '#ff4444' \
+        -strokewidth 6 \
+        -draw "line $x1,$y1 $x2,$y2" \
+        -strokewidth 1 \
+        -draw "
+            fill #ff4444
+            translate $x2,$y2
+            rotate $angle
+            scale 4,4
+            $arrow_head" \
+        "$(diagram_filename)"
 }
 
 # set dates artificially to fix commit ordering in diagrams
@@ -75,11 +94,13 @@ diagram
 git branch -f stable prod
 
 diagram
+add_arrow 81 1076 150 770
 
 # uat becomes prod
 git switch -C prod uat
 
 diagram
+add_arrow 81 697 150 316
 
 # create release commit on prod
 git commit --allow-empty -m 'prepare release v4.2.0'
@@ -102,6 +123,7 @@ diagram
 git branch -f uat develop
 
 diagram
+add_arrow 81 473 252 90
 
 # now, develop can move on
 git commit --allow-empty -m 'work 8'
