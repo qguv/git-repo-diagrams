@@ -36,7 +36,7 @@ env -i \
     USER="$USER" \
     DISPLAY=":1" \
     GDK_SCALE=$resolution_multiplier \
-    gitg --all &
+    gitg --all 2>&1 | grep -vF 'dconf-WARNING' >&2 &
 gitg_pid="$!"
 
 sleep "$sleep_time"
