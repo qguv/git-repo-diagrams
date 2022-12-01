@@ -14,11 +14,11 @@ sleep_time=0.3
 
 current_branch="$(git branch --show-current)"
 if [ -n "$show_branch" ]; then
-    git switch -C delete-me "$show_branch"
+    git switch -C delete-me "$show_branch" --quiet
 else
-    git switch -C delete-me
+    git switch -C delete-me --quiet
 fi
-git commit -m 'delete me' --allow-empty
+git commit -m 'delete me' --allow-empty --quiet
 
 # create virtual display
 gitg_w=$(($gitg_default_w * $resolution_multiplier))
@@ -36,7 +36,7 @@ env -i \
     USER="$USER" \
     DISPLAY=":1" \
     GDK_SCALE=$resolution_multiplier \
-    gitg --all 2>&1 | grep -vF 'dconf-WARNING' >&2 &
+    gitg --all 2>&1 | grep -vF 'dconf-WARNING' | grep . >&2 &
 gitg_pid="$!"
 
 sleep "$sleep_time"
@@ -61,5 +61,5 @@ mogrify \
     -bordercolor white -border 10 \
     "$output_path"
 
-git switch "$current_branch"
-git branch -D delete-me
+git switch "$current_branch" --quiet
+git branch -D delete-me --quiet

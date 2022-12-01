@@ -23,7 +23,7 @@ isodate() {
 alias git='isodate git'
 
 repo="$(mktemp -d)"
-pushd "$repo"
+pushd "$repo" >/dev/null
 
 git init
 git branch -m develop
@@ -114,5 +114,5 @@ git commit --allow-empty -m 'work 8'
 
 diagram
 
-popd
+popd >/dev/null
 rm -rf "$repo"
