@@ -9,7 +9,7 @@ diagram() {
         i=$((i + 1))
         filename="$(printf '%03d.png' $i)"
     fi
-    sh "$SCRIPT_DIR/gen_diagram.sh" "$SCRIPT_DIR/$filename"
+    sh "$SCRIPT_DIR/gen_diagram.sh" "$SCRIPT_DIR/$filename" develop
     printf 'wrote %s\n' "$filename"
 }
 

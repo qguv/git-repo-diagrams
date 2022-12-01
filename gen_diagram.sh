@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 output_path="${1?output path required}"
-sleep_time="${2:-0.3}"
+show_branch="$2"
 
 resolution_multiplier=3
 gitg_default_w=660
@@ -10,9 +10,14 @@ crop_topleft_x=206
 crop_topleft_y=76
 crop_bottomright_x=610
 crop_bottomright_y=501
+sleep_time=0.3
 
 current_branch="$(git branch --show-current)"
-git switch -C delete-me develop
+if [ -n "$show_branch" ]; then
+    git switch -C delete-me "$show_branch"
+else
+    git switch -C delete-me
+fi
 git commit -m 'delete me' --allow-empty
 
 # create virtual display
